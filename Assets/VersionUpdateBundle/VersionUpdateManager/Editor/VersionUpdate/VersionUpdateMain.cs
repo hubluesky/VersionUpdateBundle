@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.IO;
-using AssetBundleBrowser.AssetBundleModel;
 using UnityEditor;
 using UnityEngine;
 

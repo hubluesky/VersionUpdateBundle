@@ -30,7 +30,7 @@ namespace VersionUpdate {
             importer.assetBundleName = manifestName;
         }
 
-        public static void BuildBundleCompleted(AssetBundleBrowser.AssetBundleDataSource.ABBuildInfo buildInfo) {
+        public static void BuildBundleCompleted(UnityEngine.AssetBundles.AssetBundleDataSource.ABBuildInfo buildInfo) {
             AssetDatabase.RemoveAssetBundleName(manifestName.ToLower(), true);
             string assetManifestName = Path.Combine(buildInfo.outputDirectory, Path.GetFileName(buildInfo.outputDirectory));
             string newAssetManifestName = Path.Combine(buildInfo.outputDirectory, typeof(AssetBundleManifest).Name);
