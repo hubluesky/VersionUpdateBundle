@@ -6,7 +6,6 @@ using UnityEngine.UI;
 using VersionUpdate;
 
 public class Main : MonoBehaviour {
-    public string versinoPath = "Assets/VersionUpdateBundle";
     public Canvas canvas;
     public Transform background;
     public Text loadedText;
@@ -14,6 +13,7 @@ public class Main : MonoBehaviour {
     public Slider progress;
 
     void Awake() {
+        string versinoPath = "Assets/VersionUpdateBundle/" + VersionUpdateManager.VersionUpdateDataName;
         VersionUpdateManager.Initialize(versinoPath);
 
         VersionUpdateManager.LoadBackgroundAsset("Assets/VersionUpdateBundle/Examples/Background/Background.prefab", background);

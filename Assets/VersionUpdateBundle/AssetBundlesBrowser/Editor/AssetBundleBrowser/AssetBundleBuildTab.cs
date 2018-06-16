@@ -370,14 +370,6 @@ namespace UnityEngine.AssetBundles
 
             AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
 
-            // rename
-            // string buildTargetName = Path.Combine(buildInfo.outputDirectory, System.IO.Path.GetFileNameWithoutExtension(buildInfo.outputDirectory));
-            // string manifestName = Path.Combine(buildInfo.outputDirectory, typeof(AssetBundleManifest).Name.ToLower());
-            // File.Copy(buildTargetName, manifestName, true);
-            // File.Copy(buildTargetName + ".manifest", manifestName + ".manifest", true);
-            // File.Delete(buildTargetName);
-            // File.Delete(buildTargetName + ".manifest");
-
             if (m_CopyToStreaming.state) {
                 DirectoryCopy(m_UserData.m_OutputPath, m_streamingPath, ".manifest");
                 File.Delete(Path.Combine(m_streamingPath, typeof(AssetBundleManifest).Name.ToLower()));

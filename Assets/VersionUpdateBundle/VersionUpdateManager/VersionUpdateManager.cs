@@ -10,12 +10,11 @@ namespace VersionUpdate {
 
         public static void Initialize(string versionPath) {
             AssetBundleManager.Initialize();
-            versionData = AssetBundleManager.Instance.LoadAsset<VersionUpdateData>(Path.Combine(versionPath, VersionUpdateDataName));
+            versionData = AssetBundleManager.Instance.LoadAsset<VersionUpdateData>(versionPath);
             updateTaskType = TaskType.Failure;
         }
 
         public static void CheckInstallationPackage(string versionPath) {
-            versionPath = Path.Combine(versionPath, VersionUpdateDataName);
             updateTaskType = TaskType.CheckInstallationPackage;
             string bundleName;
             if (!AssetBundleManager.Instance.GetBundleName(versionPath, out bundleName))

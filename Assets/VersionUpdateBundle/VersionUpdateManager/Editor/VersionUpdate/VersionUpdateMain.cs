@@ -14,6 +14,8 @@ namespace VersionUpdateEditor {
         private bool hasCreateVersionFolder;
         private string versionUpdatePath = PlatformUtility.EditorWindowsAssetsPath;
         private bool hasPackageVersion;
+        private bool copyToLastManifest = true;
+        private VersionUpdateData lastVersionData;
         private VersionUpdateData versionData;
 
         [MenuItem("AssetBundles/VersionUpdatePackage")]
@@ -65,7 +67,7 @@ namespace VersionUpdateEditor {
                 if (!Directory.Exists(outPath))
                     Directory.CreateDirectory(outPath);
             } else {
-                using(StreamReader readStream = new StreamReader(versionUpdateTablePath)) {
+                using (StreamReader readStream = new StreamReader(versionUpdateTablePath)) {
                     versionUpdateTable = JsonUtility.FromJson<VersionUpdateTable>(readStream.ReadToEnd());
                 }
             }
@@ -77,7 +79,7 @@ namespace VersionUpdateEditor {
             ArrayUtility.Add(ref versionUpdateTable.versions, version);
 
             string jsonText = JsonUtility.ToJson(versionUpdateTable);
-            using(StreamWriter writeStream = new StreamWriter(versionUpdateTablePath)) {
+            using (StreamWriter writeStream = new StreamWriter(versionUpdateTablePath)) {
                 writeStream.Write(jsonText);
             }
         }
@@ -118,9 +120,11 @@ namespace VersionUpdateEditor {
             string[] newBundles = newManifest.GetAllAssetBundles();
             WriteVersionUpdateTable(publishPath, versionData.versionNumber, zipName);
             ZipUtility.CompressesFileList(assetBundlesPath, newBundles, string.Empty, Path.Combine(publishPath, zipName));
-            CopyAssetBundleManifestToOldPath(assetBundlesPath, lasetManifestPath);
+            if (copyToLastManifest)
+                CopyAssetBundleManifestToOldPath(assetBundlesPath, lasetManifestPath);
             hasPackageVersion = true;
             Debug.Log("Create Version Package Successful!");
+            EditorUtility.RevealInFinder(publishPath);
         }
 
         private void GenerateIncrementalPackage() {
@@ -169,19 +173,24 @@ namespace VersionUpdateEditor {
                 string zipName = versionData.versionNumber + ".zip";
                 WriteVersionUpdateTable(publishPath, versionData.versionNumber, zipName);
                 ZipUtility.CompressesFileList(assetBundlesPath, addList.ToArray(), string.Empty, Path.Combine(publishPath, zipName));
-                CopyAssetBundleManifestToOldPath(assetBundlesPath, lasetManifestPath);
+                if (copyToLastManifest)
+                    CopyAssetBundleManifestToOldPath(assetBundlesPath, lasetManifestPath);
                 hasPackageVersion = true;
                 Debug.Log("Generate Incremental Package Successful!");
             } else {
                 Debug.Log("No Incremental Package Generate!");
             }
+
+            EditorUtility.RevealInFinder(publishPath);
         }
 
         private void CopyAssetBundleManifestToOldPath(string srcPath, string destPath) {
             string manifestBundleName = typeof(AssetBundleManifest).Name;
+            string versionUpdateData = typeof(VersionUpdateData).Name;
             if (!Directory.Exists(destPath))
                 Directory.CreateDirectory(destPath);
             File.Copy(Path.Combine(srcPath, manifestBundleName), Path.Combine(destPath, manifestBundleName), true);
+            File.Copy(Path.Combine(srcPath, versionUpdateData), Path.Combine(destPath, versionUpdateData), true);
         }
 
         private void CreateVersionUpdateFolder(string folderName) {
@@ -196,6 +205,7 @@ namespace VersionUpdateEditor {
 
         void OnEnable() {
             LoadAssetBundleAsset(Path.Combine(versionUpdatePath, assetBundlesFolder), out versionData);
+            LoadAssetBundleAsset(Path.Combine(versionUpdatePath, lastManifestFolder), out lastVersionData);
         }
 
         private void OnGUI() {
@@ -234,12 +244,22 @@ namespace VersionUpdateEditor {
             EditorGUILayout.TextField("Asset Bundles Path", assetBundlesPath);
             EditorGUILayout.TextField("Publish Path", publishPath);
 
+            if (lastVersionData != null) {
+                EditorGUILayout.IntField("Last Version Number", lastVersionData.versionNumber);
+            } else {
+                EditorGUILayout.TextField("Last Version Number", "Can not load last version data.");
+            }
+
             if (versionData != null) {
                 EditorGUILayout.IntField("New Version Number", versionData.versionNumber);
             } else {
                 EditorGUILayout.TextField("New Version Number", "Can not load version data.");
             }
             EditorGUI.EndDisabledGroup();
+
+            EditorGUILayout.Space();
+
+            copyToLastManifest = GUILayout.Toggle(copyToLastManifest, "Copy To LastManifest");
 
             EditorGUI.BeginDisabledGroup(versionData == null);
             GUILayout.BeginHorizontal();

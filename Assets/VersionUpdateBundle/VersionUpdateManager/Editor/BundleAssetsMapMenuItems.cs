@@ -20,7 +20,7 @@ namespace VersionUpdateEditor {
             string[] bundleNames = AssetDatabase.GetAllAssetBundleNames();
             foreach (string bundleName in bundleNames) {
                 foreach (string assetName in AssetDatabase.GetAssetPathsFromAssetBundle(bundleName)) {
-                    manifest.AddBundleAssetPath(assetName.Remove(0, "Assets/".Length), bundleName);
+                    manifest.AddBundleAssetPath(assetName, bundleName);
                 }
 
                 manifest.AddBundleData(bundleName, AssetDatabase.GetAssetBundleDependencies(bundleName, true));
