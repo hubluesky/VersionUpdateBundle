@@ -3,14 +3,14 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace VersionUpdate {
-    public class LoadedSceneTask : AssetAsyncTask {
-        private AsyncOperation operation;
+    public class LoadedSceneTask : SceneAsyncTask {
         private AssetBundleLoaded bundleLoaded;
+
         public override float progress {
             get {
                 if (bundleLoaded == null) return 0.0f;
-                if (operation == null) return (bundleLoaded.progress + 1) * 0.5f;
-                return (operation.progress + 1) * 0.5f;
+                if (operation == null) return bundleLoaded.progress * 0.5f;
+                return (bundleLoaded.progress + operation.progress) * 0.5f;
             }
         }
 
@@ -23,6 +23,7 @@ namespace VersionUpdate {
             bundleLoaded = assetBundleManager.LoadAssetBundleAsync(assetBundleName);
             yield return bundleLoaded;
             operation = SceneManager.LoadSceneAsync(sceneName, mode);
+            operation.allowSceneActivation = !notActivatedScene;
         }
 
         public override T GetAsset<T>() {

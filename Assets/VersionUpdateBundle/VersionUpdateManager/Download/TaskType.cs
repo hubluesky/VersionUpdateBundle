@@ -1,6 +1,7 @@
 namespace VersionUpdate {
     public enum TaskType {
-        Check,
+        CheckInstallationPackage,
+        CheckUpdate,
         Download,
         Decompression,
         Install,

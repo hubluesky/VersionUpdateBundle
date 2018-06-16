@@ -2,8 +2,9 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
+using VersionUpdate;
 
-namespace VersionUpdate {
+namespace VersionUpdateEditor {
     public class VersionUpdateMain : EditorWindow {
         private static readonly string versionDataPath = "Assets/" + VersionUpdateManager.VersionPath;
         private static readonly string lastManifestFolder = "LastManifest";

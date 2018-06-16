@@ -12,5 +12,7 @@ namespace VersionUpdate {
         public abstract bool IsDone();
         public abstract T GetAsset<T>() where T : UnityEngine.Object;
         public abstract float progress { get; }
+        public virtual bool notActivatedScene { get; set; }
+        public virtual bool sceneLoadFinished { get; }
     }
 }

@@ -289,7 +289,7 @@ namespace UnityEngine.AssetBundles
             EditorGUILayout.Space();
             if (GUILayout.Button("Build") )
             {
-                VersionUpdate.BundleAssetsMapMenuItems.PrepareBundleAssetsMap();
+                VersionUpdateEditor.BundleAssetsMapMenuItems.PrepareBundleAssetsMap();
                 EditorApplication.delayCall += ExecuteBuild;
             }
             GUILayout.EndVertical();
@@ -299,8 +299,8 @@ namespace UnityEngine.AssetBundles
         internal static void CleanStreamingPath() {
             string bundlePathMap = Path.Combine(m_streamingPath, typeof(VersionUpdate.BundleManifest).Name.ToLower());
             string assetBundleManifest = Path.Combine(m_streamingPath, typeof(AssetBundleManifest).Name.ToLower());
-            if (Directory.Exists(m_streamingPath + "/res"))
-                Directory.Delete(m_streamingPath + "/res", true);
+            if (Directory.Exists(m_streamingPath))
+                Directory.Delete(m_streamingPath, true);
             if (File.Exists(bundlePathMap))
                 File.Delete(bundlePathMap);
             if (File.Exists(assetBundleManifest))
@@ -366,17 +366,17 @@ namespace UnityEngine.AssetBundles
             buildInfo.buildTarget = (BuildTarget)m_UserData.m_BuildTarget;
 
             AssetBundleModel.Model.DataSource.BuildAssetBundles(buildInfo);
-            VersionUpdate.BundleAssetsMapMenuItems.BuildBundleCompleted(buildInfo);
+            VersionUpdateEditor.BundleAssetsMapMenuItems.BuildBundleCompleted(buildInfo);
 
             AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
 
             // rename
-            string buildTargetName = Path.Combine(buildInfo.outputDirectory, buildInfo.buildTarget.ToString());
-            string manifestName = Path.Combine(buildInfo.outputDirectory, typeof(AssetBundleManifest).Name.ToLower());
-            File.Copy(buildTargetName, manifestName, true);
-            File.Copy(buildTargetName + ".manifest", manifestName + ".manifest", true);
-            File.Delete(buildTargetName);
-            File.Delete(buildTargetName + ".manifest");
+            // string buildTargetName = Path.Combine(buildInfo.outputDirectory, System.IO.Path.GetFileNameWithoutExtension(buildInfo.outputDirectory));
+            // string manifestName = Path.Combine(buildInfo.outputDirectory, typeof(AssetBundleManifest).Name.ToLower());
+            // File.Copy(buildTargetName, manifestName, true);
+            // File.Copy(buildTargetName + ".manifest", manifestName + ".manifest", true);
+            // File.Delete(buildTargetName);
+            // File.Delete(buildTargetName + ".manifest");
 
             if (m_CopyToStreaming.state) {
                 DirectoryCopy(m_UserData.m_OutputPath, m_streamingPath, ".manifest");

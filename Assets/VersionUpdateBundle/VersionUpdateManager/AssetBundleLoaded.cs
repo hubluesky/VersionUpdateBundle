@@ -7,12 +7,14 @@ namespace VersionUpdate {
         private List<AssetBundleLoaded> mainAssetBundleList = new List<AssetBundleLoaded>();
         public AssetBundle assetBundle { get; private set; }
         public int referencedCount { get; set; }
-        internal string[] dependencies { get; set; }
+        internal string bundleName { get; private set; }
+        internal string[] dependencies { get; private set; }
         private bool selfLoadedCompleted;
         public override bool keepWaiting { get { return dependencyLoadedCount != dependencies.Length; } }
-        public float progress { get { return (dependencyLoadedCount + 1) / (dependencies.Length + 1); } }
+        public float progress { get { return AssetBundleManager.Instance.GetAssetBundleLoadProgress(bundleName, dependencies); } }
 
-        public AssetBundleLoaded(string[] dependencies) {
+        public AssetBundleLoaded(string bundleName, string[] dependencies) {
+            this.bundleName = bundleName;
             this.dependencies = dependencies;
             dependencyLoadedCount = -1;
         }

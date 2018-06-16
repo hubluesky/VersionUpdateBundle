@@ -30,7 +30,7 @@ namespace VersionUpdate {
         }
 
 #if UNITY_EDITOR
-        protected override bool GetBundleName(string assetName, out string bundleName) {
+        public override bool GetBundleName(string assetName, out string bundleName) {
             if (!simulateAssetBundle)
                 return base.GetBundleName(assetName, out bundleName);
             bundleName = AssetPrefix + assetName;
@@ -55,6 +55,17 @@ namespace VersionUpdate {
                 }
             }
             return null;
+        }
+
+        public override bool LoadBundleScene(string bundleName, string sceneName, UnityEngine.SceneManagement.LoadSceneMode mode) {
+            if (!simulateAssetBundle)
+                return base.LoadBundleScene(bundleName, sceneName, mode);
+
+            if (mode == LoadSceneMode.Additive)
+                UnityEditor.EditorApplication.LoadLevelAdditiveInPlayMode(bundleName);
+            else
+                UnityEditor.EditorApplication.LoadLevelInPlayMode(bundleName);
+            return true;
         }
 
         protected override AssetAsyncTask CreateLoadBundleAssetAsyncTask(string bundleName, string assetName, System.Type type) {
@@ -85,6 +96,14 @@ namespace VersionUpdate {
                 return new RequestAssetAsyncTask(UnityEditor.EditorApplication.LoadLevelAdditiveAsyncInPlayMode(bundleName));
             else
                 return new RequestAssetAsyncTask(UnityEditor.EditorApplication.LoadLevelAsyncInPlayMode(bundleName));
+        }
+
+        protected override AssetAsyncTask CreateLoadBundleMultiSceneAsyncTask(string bundleName, string sceneName) {
+            if (!simulateAssetBundle)
+                return base.CreateLoadBundleMultiSceneAsyncTask(bundleName, sceneName);
+
+            
+            return new RequestAssetAsyncTask(UnityEditor.EditorApplication.LoadLevelAdditiveAsyncInPlayMode(bundleName));
         }
 
         public override void UnloadAssetBundle(string bundleName, bool forceUnload) {

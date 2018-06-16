@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace VersionUpdate {
     public class AssetBundleManager : MonoBehaviour {
@@ -85,9 +86,10 @@ namespace VersionUpdate {
         internal AssetBundleLoaded LoadAssetBundle(string bundleName, AssetBundleLoaded dependencyAssetBundle = null) {
             AssetBundleLoaded loadAssetBundle;
             if (!cacheMap.TryGetValue(bundleName, out loadAssetBundle)) {
+                Debug.Log("Load asset bundle " + bundleName);
                 AssetBundle bundle = AssetBundle.LoadFromFile(GetBundlePath(bundleName));
                 string[] dependencies = assetBundleManifest.GetAllDependencies(bundleName);
-                loadAssetBundle = new AssetBundleLoaded(dependencies);
+                loadAssetBundle = new AssetBundleLoaded(bundleName, dependencies);
                 loadAssetBundle.SetLoadedAssetBundle(bundle);
                 cacheMap.Add(bundleName, loadAssetBundle);
 
@@ -129,11 +131,27 @@ namespace VersionUpdate {
             tempList.Clear();
         }
 
+        private float GetAssetBundleLoadProgress(string bundleName) {
+            AssetBundleCreateRequest createRequest;
+            if (loadingMap.TryGetValue(bundleName, out createRequest))
+                return createRequest.progress;
+            else
+                return cacheMap[bundleName].assetBundle == null ? 0.0f : 1.0f;
+        }
+
+        internal float GetAssetBundleLoadProgress(string bundleName, string[] dependencies) {
+            float progress = GetAssetBundleLoadProgress(bundleName);
+            foreach (string dependency in dependencies)
+                progress += GetAssetBundleLoadProgress(dependency);
+            return progress / (dependencies.Length + 1);
+        }
+
         internal AssetBundleLoaded LoadAssetBundleAsync(string bundleName, AssetBundleLoaded dependencyAssetBundle = null) {
             AssetBundleLoaded assetBundleLoad;
             if (!cacheMap.TryGetValue(bundleName, out assetBundleLoad)) {
+                Debug.Log("Load asset bundle " + bundleName);
                 string[] dependencies = assetBundleManifest.GetAllDependencies(bundleName);
-                assetBundleLoad = new AssetBundleLoaded(dependencies);
+                assetBundleLoad = new AssetBundleLoaded(bundleName, dependencies);
                 cacheMap.Add(bundleName, assetBundleLoad);
 
                 AssetBundleCreateRequest loading = AssetBundle.LoadFromFileAsync(GetBundlePath(bundleName));
@@ -159,7 +177,7 @@ namespace VersionUpdate {
             return Path.Combine(PlatformUtility.GetStreamingAssetsPath(), bundleName);
         }
 
-        protected virtual bool GetBundleName(string assetName, out string bundleName) {
+        public virtual bool GetBundleName(string assetName, out string bundleName) {
             if (!assetBundleManifest.GetBundleNameByAssetPath(assetName, out bundleName)) {
                 Debug.LogError("Load asset failed: " + assetName);
                 return false;
@@ -189,6 +207,34 @@ namespace VersionUpdate {
             return LoadBundleSubAsset(bundleName, Path.GetFileNameWithoutExtension(assetName), subAssetName, type);
         }
 
+        public bool LoadScene(string sceneName, LoadSceneMode mode) {
+            string bundleName;
+            if (!GetBundleName(sceneName, out bundleName))
+                return false;
+            return LoadBundleScene(bundleName, Path.GetFileNameWithoutExtension(sceneName), mode);
+        }
+
+        public bool LoadMultiScene(string assetName) {
+            MultiSceneSetup multiSceneSetup = LoadAsset<MultiSceneSetup>(assetName);
+            if (multiSceneSetup == null)
+                return false;
+
+            for (int i = 0; i < multiSceneSetup.scenePaths.Length; i++)
+                LoadScene(multiSceneSetup.scenePaths[i], i == 0 ? LoadSceneMode.Single : LoadSceneMode.Additive);
+
+            if (multiSceneSetup.indexActiveScene >= 0 && multiSceneSetup.indexActiveScene < multiSceneSetup.scenePaths.Length) {
+                string sceneName = "Assets/" + multiSceneSetup.scenePaths[multiSceneSetup.indexActiveScene];
+                for (int i = 0; i < SceneManager.sceneCount; i++) {
+                    Scene scene = SceneManager.GetSceneAt(i);
+                    if (scene.path == sceneName) {
+                        SceneManager.SetActiveScene(scene);
+                        break;
+                    }
+                }
+            }
+            return true;
+        }
+
         public AssetAsyncTask LoadAssetAsync<T>(string assetName) {
             return LoadAssetAsync(assetName, typeof(T));
         }
@@ -211,11 +257,18 @@ namespace VersionUpdate {
             return LoadBundleSubAssetAsync(bundleName, Path.GetFileNameWithoutExtension(assetName), subAssetName, type);
         }
 
-        public AssetAsyncTask LoadSceneAsync(string sceneName, UnityEngine.SceneManagement.LoadSceneMode mode) {
+        public AssetAsyncTask LoadSceneAsync(string sceneName, LoadSceneMode mode) {
             string bundleName;
             if (!GetBundleName(sceneName, out bundleName))
                 return new CacheAssetAsyncTask(null);
             return LoadBundleSceneAsync(bundleName, Path.GetFileNameWithoutExtension(sceneName), mode);
+        }
+
+        public AssetAsyncTask LoadMultiSceneAsync(string assetName) {
+            string bundleName;
+            if (!GetBundleName(assetName, out bundleName))
+                return new CacheAssetAsyncTask(null);
+            return LoadBundleMultiSceneAsync(bundleName, Path.GetFileNameWithoutExtension(assetName));
         }
 
         public T LoadBundleAsset<T>(string bundleName, string assetName) where T : Object {
@@ -245,6 +298,14 @@ namespace VersionUpdate {
             return null;
         }
 
+        public virtual bool LoadBundleScene(string bundleName, string sceneName, LoadSceneMode mode) {
+            AssetBundleLoaded assetBundleWrap = LoadAssetBundle(bundleName);
+            if (assetBundleWrap.assetBundle == null)
+                return false;
+            SceneManager.LoadScene(sceneName, mode);
+            return true;
+        }
+
         public AssetAsyncTask LoadBundleAssetAsync<T>(string bundleName, string assetName) where T : Object {
             return LoadBundleAssetAsync(bundleName, assetName, typeof(T));
         }
@@ -261,8 +322,12 @@ namespace VersionUpdate {
             return CreateLoadBundleSubAssetAsyncTask(bundleName, assetName, subAssetName, type);
         }
 
-        public AssetAsyncTask LoadBundleSceneAsync(string bundleName, string sceneName, UnityEngine.SceneManagement.LoadSceneMode mode) {
+        public AssetAsyncTask LoadBundleSceneAsync(string bundleName, string sceneName, LoadSceneMode mode) {
             return CreateLoadBundleSceneAsyncTask(bundleName, sceneName, mode);
+        }
+
+        public AssetAsyncTask LoadBundleMultiSceneAsync(string bundleName, string assetName) {
+            return CreateLoadBundleMultiSceneAsyncTask(bundleName, assetName);
         }
 
         protected virtual AssetAsyncTask CreateLoadBundleAssetAsyncTask(string bundleName, string assetName, System.Type type) {
@@ -273,8 +338,12 @@ namespace VersionUpdate {
             return new LoadedSubAssetTask(this, bundleName, assetName, subAssetName, type);
         }
 
-        protected virtual AssetAsyncTask CreateLoadBundleSceneAsyncTask(string bundleName, string sceneName, UnityEngine.SceneManagement.LoadSceneMode mode) {
+        protected virtual AssetAsyncTask CreateLoadBundleSceneAsyncTask(string bundleName, string sceneName, LoadSceneMode mode) {
             return new LoadedSceneTask(this, bundleName, sceneName, mode);
+        }
+
+        protected virtual AssetAsyncTask CreateLoadBundleMultiSceneAsyncTask(string bundleName, string sceneName) {
+            return new LoadedMultiSceneTask(this, bundleName, sceneName);
         }
 
         public void UnloadAllAssetBundle() {

@@ -1,7 +1,8 @@
 using UnityEditor;
 using UnityEngine;
+using VersionUpdate;
 
-namespace VersionUpdate {
+namespace VersionUpdateEditor {
     public class AssetBundlesMenuItems {
         private const string kSimulationMode = "AssetBundles/Simulation Mode";
 

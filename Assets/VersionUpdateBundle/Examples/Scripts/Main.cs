@@ -37,7 +37,7 @@ public class Main : MonoBehaviour {
 		if (VersionUpdateManager.error != null)
 			return "下载失败! " + VersionUpdateManager.error;
 		switch (VersionUpdateManager.taskType) {
-			case TaskType.Check:
+			case TaskType.CheckUpdate:
 				return "正在检查更新";
 			case TaskType.Download:
 				return "正在下载更新";

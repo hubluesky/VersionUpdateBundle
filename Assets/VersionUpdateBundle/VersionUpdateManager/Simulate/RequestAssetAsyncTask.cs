@@ -1,8 +1,7 @@
 using UnityEngine;
 
 namespace VersionUpdate {
-    public class RequestAssetAsyncTask : AssetAsyncTask {
-        private AsyncOperation operation;
+    public class RequestAssetAsyncTask : SceneAsyncTask {
 
         public RequestAssetAsyncTask(AsyncOperation operation) {
             this.operation = operation;

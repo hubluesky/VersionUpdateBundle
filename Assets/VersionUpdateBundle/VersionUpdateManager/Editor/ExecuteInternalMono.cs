@@ -7,7 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System;
 
-namespace VersionUpdate {
+namespace VersionUpdateEditor {
     class MonoInstallationFinder {
         public static string GetFrameWorksFolder() {
             var editorAppPath = EditorApplication.applicationPath;

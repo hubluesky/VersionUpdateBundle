@@ -9,7 +9,7 @@ using System.Net;
 using System.Threading;
 using UnityEditor.Utils;
 
-namespace VersionUpdate {
+namespace VersionUpdateEditor {
     internal class LaunchAssetBundleServer : ScriptableSingleton<LaunchAssetBundleServer> {
         private static string overloadedDevelopmentServerURL = "";
         private const string kLocalAssetbundleServerMenu = "AssetBundles/Local AssetBundle Server";

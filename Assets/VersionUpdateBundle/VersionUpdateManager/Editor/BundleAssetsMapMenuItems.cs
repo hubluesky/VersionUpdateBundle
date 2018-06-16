@@ -2,8 +2,9 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
+using VersionUpdate;
 
-namespace VersionUpdate {
+namespace VersionUpdateEditor {
     public class BundleAssetsMapMenuItems {
         private static readonly string manifestName = typeof(BundleManifest).Name;
         private static readonly string manifestAssetPath = "Assets/" + manifestName + ".asset";
@@ -24,6 +25,7 @@ namespace VersionUpdate {
 
                 manifest.AddBundleData(bundleName, AssetDatabase.GetAssetBundleDependencies(bundleName, true));
             }
+            EditorUtility.SetDirty(manifest);
 
             AssetDatabase.LoadAssetAtPath<BundleManifest>(manifestAssetPath);
             AssetImporter importer = AssetImporter.GetAtPath(manifestAssetPath);

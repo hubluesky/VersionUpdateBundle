@@ -23,7 +23,7 @@ namespace VersionUpdate {
         public override float progress {
             get {
                 switch (taskType) {
-                    case TaskType.Check:
+                    case TaskType.CheckUpdate:
                         return wwwCheck != null ? wwwCheck.downloadProgress : 0;
                     case TaskType.Download:
                         return wwwDownload != null ? (downProgress + wwwDownload.downloadProgress * fileUnitProgress) : 0;
@@ -37,7 +37,7 @@ namespace VersionUpdate {
 
         public override T GetAsset<T>() { return null; }
 
-        public override bool IsDone() { return taskType == TaskType.Completed; }
+        public override bool IsDone() { return taskType == TaskType.Completed || taskType == TaskType.Install; }
 
         public DownloadUpdateTask(MonoBehaviour monoBehaviour, string url, int versionNumber, string temporaryPath, string downloadPath) {
             monoBehaviour.StartCoroutine(CheckAssetBundlesDownload(url, versionNumber, temporaryPath, downloadPath));
@@ -52,9 +52,10 @@ namespace VersionUpdate {
         }
 
         public IEnumerator CheckAssetBundlesDownload(string url, int versionNumber, string temporaryPath, string downloadPath) {
-            taskType = TaskType.Check;
+            taskType = TaskType.CheckUpdate;
             string filename = Path.Combine(url, typeof(VersionUpdateTable).Name + ".json");
             using(wwwCheck = UnityWebRequest.Get(filename)) {
+                wwwCheck.timeout = 10;
                 yield return wwwCheck.Send();
                 if (wwwCheck.isError) {
                     error = wwwCheck.error;

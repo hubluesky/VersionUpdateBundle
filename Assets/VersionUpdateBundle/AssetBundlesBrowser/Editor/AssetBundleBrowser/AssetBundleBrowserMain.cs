@@ -60,7 +60,7 @@ namespace UnityEngine.AssetBundles
             buildTab.m_UserData.m_Compression = compression;
             buildTab.m_ForceRebuild.state = clearFolders;
             buildTab.m_CopyToStreaming.state = copyToStreamingAssets;
-            VersionUpdate.BundleAssetsMapMenuItems.PrepareBundleAssetsMap();
+            VersionUpdateEditor.BundleAssetsMapMenuItems.PrepareBundleAssetsMap();
             buildTab.ExecuteBuild();
             window.Close();
         }
