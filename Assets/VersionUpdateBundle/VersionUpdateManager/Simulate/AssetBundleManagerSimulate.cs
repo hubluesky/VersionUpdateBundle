@@ -7,7 +7,6 @@ using UnityEngine.SceneManagement;
 
 namespace VersionUpdate {
     public class AssetBundleManagerSimulate : AssetBundleManager {
-        private const string AssetPrefix = "Assets/";
         private const string simulateAssetBundlesText = "SimulateAssetBundles";
         private static int _simulateAssetBundle = -1;
         public static bool simulateAssetBundle {
@@ -33,7 +32,7 @@ namespace VersionUpdate {
         public override bool GetBundleName(string assetName, out string bundleName) {
             if (!simulateAssetBundle)
                 return base.GetBundleName(assetName, out bundleName);
-            bundleName = AssetPrefix + assetName;
+            bundleName = assetName;
             return true;
         }
 
@@ -102,7 +101,6 @@ namespace VersionUpdate {
             if (!simulateAssetBundle)
                 return base.CreateLoadBundleMultiSceneAsyncTask(bundleName, sceneName);
 
-            
             return new RequestAssetAsyncTask(UnityEditor.EditorApplication.LoadLevelAdditiveAsyncInPlayMode(bundleName));
         }
 

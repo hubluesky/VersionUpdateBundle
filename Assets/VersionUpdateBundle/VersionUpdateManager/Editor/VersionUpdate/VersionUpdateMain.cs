@@ -6,7 +6,7 @@ using VersionUpdate;
 
 namespace VersionUpdateEditor {
     public class VersionUpdateMain : EditorWindow {
-        private static readonly string versionDataPath = "Assets/" + VersionUpdateManager.VersionPath;
+        private static readonly string versionDataPath = "Assets/" + VersionUpdateManager.VersionUpdateDataName;
         private static readonly string lastManifestFolder = "LastManifest";
         private static readonly string assetBundlesFolder = "AssetBundles";
         private static readonly string publishFolder = "Publish";

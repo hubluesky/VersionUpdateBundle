@@ -3,21 +3,22 @@ using UnityEngine;
 
 namespace VersionUpdate {
     public sealed class VersionUpdateManager {
-        public static readonly string VersionPath = typeof(VersionUpdateData).Name + ".asset";
+        public static readonly string VersionUpdateDataName = typeof(VersionUpdateData).Name + ".asset";
         private static DownloadUpdateTask downloadTask;
         private static VersionUpdateData versionData;
         private static TaskType updateTaskType;
 
-        public static void Initialize() {
+        public static void Initialize(string versionPath) {
             AssetBundleManager.Initialize();
-            versionData = AssetBundleManager.Instance.LoadAsset<VersionUpdateData>(VersionPath);
+            versionData = AssetBundleManager.Instance.LoadAsset<VersionUpdateData>(Path.Combine(versionPath, VersionUpdateDataName));
             updateTaskType = TaskType.Failure;
         }
 
-        public static void CheckInstallationPackage() {
+        public static void CheckInstallationPackage(string versionPath) {
+            versionPath = Path.Combine(versionPath, VersionUpdateDataName);
             updateTaskType = TaskType.CheckInstallationPackage;
             string bundleName;
-            if (!AssetBundleManager.Instance.GetBundleName(VersionPath, out bundleName))
+            if (!AssetBundleManager.Instance.GetBundleName(versionPath, out bundleName))
                 return;
 
             string bundlePath = Path.Combine(PlatformUtility.GetExternalPath(), bundleName);
@@ -30,7 +31,7 @@ namespace VersionUpdate {
             if (bundle == null)
                 return;
 
-            string assetName = Path.GetFileNameWithoutExtension(VersionPath);
+            string assetName = Path.GetFileNameWithoutExtension(versionPath);
             VersionUpdateData packageVersionData = bundle.LoadAsset<VersionUpdateData>(assetName);
             bundle.Unload(false);
             if (packageVersionData == null || versionData.versionNumber >= packageVersionData.versionNumber)
