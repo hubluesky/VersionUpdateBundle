@@ -38,11 +38,16 @@ namespace VersionUpdateEditor {
             if (instance.m_ServerPID == 0)
                 return false;
 
-            var process = Process.GetProcessById(instance.m_ServerPID);
-            if (process == null)
+            try {
+                var process = Process.GetProcessById(instance.m_ServerPID);
+                if (process != null)
+                    return !process.HasExited;
+            } catch (Exception e) {
+                UnityEngine.Debug.LogException(e);
                 return false;
+            }
 
-            return !process.HasExited;
+            return false;
         }
 
         static void KillRunningAssetBundleServer() {
@@ -53,9 +58,9 @@ namespace VersionUpdateEditor {
 
                 var lastProcess = Process.GetProcessById(instance.m_ServerPID);
                 lastProcess.Kill();
-                instance.m_ServerPID = 0;
             } catch {
             }
+            instance.m_ServerPID = 0;
         }
 
         public static void WriteServerURL() {
@@ -102,7 +107,8 @@ namespace VersionUpdateEditor {
                 //We seem to have launched, let's save the PID
                 instance.m_ServerPID = launchProcess.Id;
             }
-            UnityEngine.Debug.Log("Start Server, Working Directory : " + startInfo.WorkingDirectory);
+            
+            UnityEngine.Debug.LogFormat("Start Server, Process Id {0} Working Directory : {1}", launchProcess.Id, startInfo.WorkingDirectory);
         }
     }
 }
