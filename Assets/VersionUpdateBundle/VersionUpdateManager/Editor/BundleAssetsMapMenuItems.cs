@@ -32,7 +32,7 @@ namespace VersionUpdateEditor {
             importer.assetBundleName = manifestName;
         }
 
-        public static void BuildBundleCompleted(UnityEngine.AssetBundles.AssetBundleDataSource.ABBuildInfo buildInfo) {
+        public static void BuildBundleCompleted(AssetBundleBrowser.AssetBundleDataSource.ABBuildInfo buildInfo) {
             AssetDatabase.RemoveAssetBundleName(manifestName.ToLower(), true);
             string assetManifestName = Path.Combine(buildInfo.outputDirectory, Path.GetFileName(buildInfo.outputDirectory));
             string newAssetManifestName = Path.Combine(buildInfo.outputDirectory, typeof(AssetBundleManifest).Name);
@@ -44,6 +44,8 @@ namespace VersionUpdateEditor {
             File.Move(assetManifestName, newAssetManifestName);
             File.Move(assetManifestName + ".manifest", newAssetManifestName + ".manifest");
             AssetDatabase.DeleteAsset(manifestAssetPath);
+
+            Debug.Log("Build Bundles Completed.");
         }
     }
 }

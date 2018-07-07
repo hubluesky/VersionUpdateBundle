@@ -34,3 +34,5 @@ sysinfo.txt
 *.unitypackage
 /.vscode
 /VersionUpdate
+/ProjectSettings/ProjectVersion.txt
+/ExternalPath
